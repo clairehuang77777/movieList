@@ -1,0 +1,31 @@
+
+
+.searchAndViewSelection {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.viewSelection {
+  display: flex;
+  gap:10px;
+  justify-content: flex-end
+}
+
+.viewSelection i {
+ width: 30px;
+ height: 30px;
+}
+
+.row{
+    padding-bottom: 10px;
+}
+
+
+
+#insideListBtn {
+  float:right;
+  margin-right: 250px;
+}
+
