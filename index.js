@@ -14,10 +14,10 @@ let filterMovie = [] //變成全域變數，為了要讓大家都可以改動
 const movieGirdView = document.querySelector("#movieGirdView")
 const movieListView = document.querySelector("#movieListView")
 const viewSelection = document.querySelector(".viewSelection")
-let page =[] //將page改成global參數
+let CurrentHash = 1 //將page改成global參數
 
 //true的話代表現在顯示list view
-if (document.querySelector("#currentListView")){
+if (document.querySelector("#currentListView")) {
   console.log("it's List View now!")
 } else {
   console.log("it's grid View now!")
@@ -42,9 +42,9 @@ function renderMovieListView(data) {
 }
 
 //這邊用data而不直接使用movie是為了降低程式的耦合性
-function renderMovieGridView(data){
+function renderMovieGridView(data) {
   let htmlContent = '<div id="currentGridView" class="row">'
-    data.forEach((item) => {
+  data.forEach((item) => {
     htmlContent += `
       <div class="col-sm-3">
           <div class="mb-2">
@@ -62,65 +62,65 @@ function renderMovieGridView(data){
               </div>
             </div>
            </div>
-          </div>` 
-            })
-    dataPanel.innerHTML = htmlContent + '</div>'
+          </div>`
+  })
+  dataPanel.innerHTML = htmlContent + '</div>'
 }
 //邏輯一：當我一點擊More btn, 幫我傳送id值，並傳到另一個function中
 //邏輯二：當我一點擊add btn, 幫我傳送id值，並
-dataPanel.addEventListener("click",function(event){
-  if (event.target.matches(".btn-show-movie")){
+dataPanel.addEventListener("click", function (event) {
+  if (event.target.matches(".btn-show-movie")) {
     let id = (Number(event.target.dataset.id))
     showMovieModal(id)
-  } else if (event.target.matches(".btn-add-to-favorite")){
+  } else if (event.target.matches(".btn-add-to-favorite")) {
     addtoFavorites(Number(event.target.dataset.id))
   }
 })
 
 
 
-function addtoFavorites(id){
+function addtoFavorites(id) {
   //在本地local端讀取一個名為favorite的電影列表，沒有的話返回空陣列
   //不能直接用list=[]的方式，因為這樣每次讀取函數都會再次把list變為空陣列
   const list = JSON.parse(localStorage.getItem('favoriteMovies')) || []
-  
+
   //篩選出符合id的movie object, 並return出來為movie
 
   const movie = movies.find((movie) => movie.id === id)
-  
+
   // 在list內回圈，只要有部分符合條件，就回傳true
-  if (list.some((movie) => movie.id === id)){
+  if (list.some((movie) => movie.id === id)) {
     alert('此電影已經在搜尋清單中')
   }
 
   //把movie加入list陣列中
   list.push(movie)
   localStorage.setItem('favoriteMovies', JSON.stringify(list))
- }
+}
 
- 
+
 
 //拿到id值，並發送api,並把畫面render出來
-function showMovieModal(id){
+function showMovieModal(id) {
   const movieModalTitle = document.querySelector('#movie-modal-title')
   const MovieModalImage = document.querySelector('#movie-modal-image img')
-  const MovieModalDate  = document.querySelector('#movie-modal-date')
+  const MovieModalDate = document.querySelector('#movie-modal-date')
   const MovieModalDescription = document.querySelector('#movie-modal-description')
 
   //用axios取得res
   axios
-    .get(Index_URL+id)
-    .then(function (response){
+    .get(Index_URL + id)
+    .then(function (response) {
       const data = response.data.results
       movieModalTitle.innerHTML = data.title
       MovieModalImage.src = Poster_URL + data.image
       MovieModalDate.innerText = data.release_date
       MovieModalDescription.innerText = data.description
     })
-    .catch(function(error){
+    .catch(function (error) {
       console.log(error)
     })
-  }
+}
 
 
 axios
@@ -134,32 +134,32 @@ axios
     console.log(error)
   })
 
-  console.log(movies)
+console.log(movies)
 
-  //監聽表單提交事件
-  SearchForm.addEventListener("submit",function onsearchFormSubmitted(event){
-    event.preventDefault()
-    const keyword = SearchInput.value.toLowerCase()
+//監聽表單提交事件
+SearchForm.addEventListener("submit", function onsearchFormSubmitted(event) {
+  event.preventDefault()
+  const keyword = SearchInput.value.toLowerCase()
 
-    if (keyword.length == 0){
-      return alert(`請輸入有效字串`)
-    }
+  if (keyword.length == 0) {
+    return alert(`請輸入有效字串`)
+  }
 
-    //用filter寫法
-    function Moviefitkeyword(movie){
-      return movie.title.toLowerCase().includes(keyword)
-    }
+  //用filter寫法
+  function Moviefitkeyword(movie) {
+    return movie.title.toLowerCase().includes(keyword)
+  }
 
-    filterMovie = movies.filter(Moviefitkeyword)
-    console.log(filterMovie)
+  filterMovie = movies.filter(Moviefitkeyword)
+  console.log(filterMovie)
 
-    if (filterMovie.length === 0) {
-      return alert(`您輸入的關鍵字${keyword}沒有符合條件的電影` )
-    }
-    renderPaginator(filterMovie.length)
-    renderMovieGridView(getMovieByPage(1))
+  if (filterMovie.length === 0) {
+    return alert(`您輸入的關鍵字${keyword}沒有符合條件的電影`)
+  }
+  renderPaginator(filterMovie.length)
+  renderMovieGridView(getMovieByPage(1))
 
-  })
+})
 
 
 // 從總清單裡切割資料 
@@ -179,25 +179,27 @@ function getMovieByPage(page) {
 function renderPaginator(amount) {
   let htmltext = ''
   let pagecount = Math.ceil(amount / Movies_per_page)
-  for ( i = 1 ; i <= pagecount; i++){
+  for (i = 1; i <= pagecount; i++) {
     htmltext += `
-       <a class="page-link" href="#" data-page="${i}">${i}</a></li >`
+       <a class="page-link" href="#${i}" data-page="${i}">${i}</a></li >`
   }
   pagination.innerHTML = htmltext
 }
 //讓paginator第二頁在grid情境下顯示gridView, 在list情境下顯示listview
 //點擊切換器，觸發RenderMovie
-pagination.addEventListener("click",function onPaginatorClicked(event){
-  console.log(event.target)
+pagination.addEventListener("click", function onPaginatorClicked(event) {
+  CurrentHash = event.target.hash.substring(1)
   page = (Number(event.target.dataset.page))
-  if (event.target.matches(".page-link")){ 
+  if (event.target.matches(".page-link")) {
     //true代表現在顯示list,顯示List view,false代表現在顯示Grid,顯示Grid view
-    if (document.querySelector("#currentListView")) { 
-      console.log("it's List View now!") 
+    if (document.querySelector("#currentListView")) {
+      console.log("it's List View now!")
       renderMovieListView(getMovieByPage(page))
-    } else { 
+      console.log(CurrentHash)
+    } else {
       console.log("it's Grid View now!")
-      renderMovieGridView(getMovieByPage(page)) 
+      renderMovieGridView(getMovieByPage(page))
+      console.log(CurrentHash)
     }
   }
 })
@@ -205,20 +207,21 @@ pagination.addEventListener("click",function onPaginatorClicked(event){
 
 //在list內對paginator點擊 應該是要出現list
 viewSelection.addEventListener("click", function (event) {
-  if (event.target.id === "movieListView"){
+  console.log(window.Location.hash)
+  if (event.target.id === "movieListView") {
     //renderPaginator(movies.length)
-    renderMovieListView(getMovieByPage(page)) /*這裡的1應該改成當前在render的頁面 */
+    renderMovieListView(getMovieByPage(CurrentHash)) /*這裡的1應該改成當前在render的頁面 */
   }
   else {
     //if (event.target.id === "movieGridView") {
     //renderPaginator(movies.length)
-    renderMovieGridView(getMovieByPage(page))
-    }
-  })
+    renderMovieGridView(getMovieByPage(CurrentHash))
+  }
+})
 
 
 
-  //在第二頁去點擊List icon切換成列表模式時，要維持List icon.
+//在第二頁去點擊List icon切換成列表模式時，要維持List icon.
 
 
 
